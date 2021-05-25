@@ -1,8 +1,6 @@
 # This is a Python program for CS 470
 # Implementing search algorithms for pathfinding
 
-import random
-
 # Read in map from file and save values
 file = "map.txt"
 with open(file) as f:
