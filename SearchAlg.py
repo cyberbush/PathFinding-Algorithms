@@ -38,16 +38,10 @@ class cell:
 
     # Sort different based on search used
     def __lt__(self, other):
-        #least cost
-        #if(self.costtoreach < other.costtoreach):
-        #    return True
-        #A*
-        if((self.costtoreach+self.estimatedcosttogoal) < (other.costtoreach+other.estimatedcosttogoal)):
+        #if(self.costtoreach < other.costtoreach): # least cost
+        if((self.costtoreach+self.estimatedcosttogoal) < (other.costtoreach+other.estimatedcosttogoal)): # A*
+        #if(self.estimatedcosttogoal < other.estimatedcosttogoal): # Greedy
             return True
-        #Greedy
-        #if(self.estimatedcosttogoal < other.estimatedcosttogoal):
-        #   return True
-        
         return False
     
     def printPath(self):
@@ -63,8 +57,9 @@ class cell:
     def distance1(self):
         # |x-x'| + |y-y'|
         return abs(int(GoalX)-self.x) + abs(int(GoalY)-self.y)
+
     def distance2(self):
-        # sqrt(a^2+b^2)
+        # sqrt( a^2 + b^2 )
         return math.sqrt( pow(int(GoalX)-self.x, 2) + pow(int(GoalY)-self.y, 2) )
 
 
@@ -72,7 +67,7 @@ class cell:
 def printCostMap(): 
     for r in map:
         for c in r:
-            print(c.cost, end = " ")
+            print(round(c.cost, 2) , end = " ")
         print()
 
 def printMap(obj):
@@ -86,11 +81,14 @@ def searchList(thisList, item):
             return True
     return False
 
-def printList(L):
+def printList(L, opt):
     for i in L:
-        #print(i.costtoreach, end = " ") # least cost 
-        print(i.costtoreach+round(i.estimatedcosttogoal, 2), end = " ") # A*
-        #print(round(i.estimatedcosttogoal, 2), end = " ") # greedy
+        if(opt == "LC"):
+            print(i.costtoreach, end = " ") # least cost 
+        elif(opt == "A*"):
+            print(i.costtoreach+round(i.estimatedcosttogoal, 2), end = " ") # A*
+        elif(opt == "G"):
+            print(round(i.estimatedcosttogoal, 2), end = " ") # greedy
     print()
 
 def findCost(terrain):
@@ -114,7 +112,7 @@ def maxval(a, b):
     return b
 
 
-#creating map
+#creating map of costs
 map = []
 for y in range (0,int(Height)):
     r = []
@@ -125,22 +123,23 @@ for y in range (0,int(Height)):
     map.append(r) 
 
 #intialize 
-openlist = []
-closedlist = []
-goal = map[int(GoalY)][int(GoalX)]
+openlist = [] # list to store open cells
+closedlist = [] # list to store closed cells
+goal = map[int(GoalY)][int(GoalX)] # set goal cell
 
 def search():
-    start = map[int(StartY)][int(StartX)]
+    start = map[int(StartY)][int(StartX)] # set starting cell
     start.costtoreach = start.cost
     start.parent = None
-    start.estimatedcosttogoal = maxval(start.distance1(), start.distance2()) * avg() # heuristic
+    start.estimatedcosttogoal = maxval(start.distance1(), start.distance2()) * avg() # heuristic of max 
     openlist.append(start)
     while(len(openlist) > 0):
         # Breadth-first no sorting
-        # Least cost sort by total cost
+        # Least Cost sort by total cost
         # A* sort by total cost + estimated cost
         # Greedy sort by estimated cost (heuristic)
         openlist.sort()
+
         current = openlist.pop(0)
 
         #check if the goal has been reached
@@ -151,12 +150,15 @@ def search():
             print("Total Length: ", goal.length)
             print()
             print("Open List:")
-            printList(openlist)
+            printList(openlist, "A*")
             print()
             break
+
         #mark on explored map
         exploredmap[current.y] = exploredmap[current.y][:current.x] + '-' + exploredmap[current.y][(current.x)+1:]
+
         closedlist.append(current) #add to closed list
+
         # Find each neigbor of current and add to openlist if hasn't been searched yet
         if(current.y > 0): #top neighbor
             neighbor = map[current.y-1][current.x]
@@ -205,10 +207,10 @@ def search():
                 openlist.append(neighbor)
 
 #Driver Code
-#printcostMap()
+#printCostMap()
 print("Starting Map:")
 printMap(basemap)
-search()
+search() # Run Search Algorithm
 print("Path Found:")
 printMap(pathmap)
 print("Explored Map:")
